@@ -22,16 +22,13 @@ WHITE = (200, 200, 200)
 RED = (255, 0, 0)
 WINDOW_HEIGHT = 300
 WINDOW_WIDTH = 900
-WINDOW_GAME_DISPLAY = 100
-SCALE = 20
-ROWS = (WINDOW_HEIGHT - WINDOW_GAME_DISPLAY) // SCALE
+SCALE = 30
+ROWS = WINDOW_HEIGHT // SCALE
 COLS = WINDOW_WIDTH // SCALE
-
-print(ROWS, COLS)
-
-
 cell_sz = WINDOW_HEIGHT // ROWS
+BAT_LENGTH = 4
 
+print(COLS, ROWS)
 
 pygame.font.init()  # you have to call this at the start,
 thefont = pygame.font.SysFont('Courier New', 20)
@@ -76,9 +73,15 @@ def draw_grid():
     SCREEN.fill(BLACK)
     for ROW in range(2, ROWS):
         for COL in range(COLS):
-            rect = pygame.Rect(COL*cell_sz, ROW*cell_sz,
+            rect = pygame.Rect(COL * cell_sz, ROW * cell_sz,
                                cell_sz, cell_sz)
             pygame.draw.rect(SCREEN, WHITE, rect, 1)
+
+
+def draw_bat(col, row):
+    rect = pygame.Rect(col * cell_sz, row * cell_sz,
+                       cell_sz + BAT_LENGTH * cell_sz, cell_sz)
+    pygame.draw.rect(SCREEN, RED, rect, 0)
 
 
 def update_grid():
@@ -87,36 +90,41 @@ def update_grid():
     for ROW in range(ROWS):
         for COL in range(COLS):
             counter += 1
-            print(counter, tuple((ROW, COL)))
+            #print(counter, tuple((ROW, COL)))
     pygame.display.update()
     pygame.display.flip()
 
 
 def main():
-    global SCREEN, CLOCK
-    global TURNS
-    global enabled
-    global attempts
-    global lives
-    global score
+    global SCREEN, clock
+    global enabled, lives, score, bat_pos
     lives = 3
     score = 0
-    TURNS = 2
-    attempts = 0
+    bat_pos_row = ROWS - 1
+    bat_pos_col = (COLS // 2) - (BAT_LENGTH / 2)
     pygame.init()
     SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    CLOCK = pygame.time.Clock()
+    clock = pygame.time.Clock()
     reset()
     draw_grid()
+    pygame.key.set_repeat(1, 50)
 
     while True:
+        clock.tick(60)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    reset()
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_RIGHT]:
+                bat_pos_col += 2
+                if (bat_pos_col + (BAT_LENGTH // 2)) > ((COLS - 1) - (BAT_LENGTH // 2)):
+                    bat_pos_col = ((COLS - 1) - BAT_LENGTH)
+            if keys[pygame.K_LEFT]:
+                bat_pos_col -= 2
+                print(bat_pos_col, "edge", COLS)
+                if (bat_pos_col - (BAT_LENGTH // 2)) < - 1:
+                    bat_pos_col = 0
             if event.type == pygame.MOUSEBUTTONDOWN:
                 enabled = True
                 # Set the x, y positions of the mouse click
@@ -128,6 +136,7 @@ def main():
         game_stats_display()
         update_grid()
         draw_grid()
+        draw_bat(bat_pos_col, bat_pos_row)
 
 
 def reset():
