@@ -56,28 +56,25 @@ compare_tracker = {}
 matched_cells_tracker = []
 
 
-def reset():
-    """Reset Game state"""
-    pass
-
-
 def game_stats_display():
-    score = 0
-    attempts_string = "SCORE " + str(score)
+    score_string = "SCORE " + str(score)
+    lives_string = "LIVES " + str(lives)
     message_string = "SPACE TO RESTART.."
 
-    textsurface1 = thefont.render(attempts_string, False, (0, 255, 0))
+    textsurface1 = thefont.render(score_string, False, (0, 255, 0))
+    textsurface2 = thefont.render(lives_string, False, (255, 255, 0))
     textsurface3 = thefont.render(message_string, False, (255, 0, 0))
 
-    SCREEN.blit(textsurface1, (WINDOW_WIDTH - 150, 0 + 10))
-    SCREEN.blit(textsurface3, (WINDOW_WIDTH - 200, 0 + 25))
+    SCREEN.blit(textsurface1, (15, 15))
+    SCREEN.blit(textsurface2, (205, 15))
+    SCREEN.blit(textsurface3, (WINDOW_WIDTH - 400, 15))
     pygame.display.update()
     pygame.display.flip()
 
 
 def draw_grid():
     SCREEN.fill(BLACK)
-    for ROW in range(ROWS):
+    for ROW in range(2, ROWS):
         for COL in range(COLS):
             rect = pygame.Rect(COL*cell_sz, ROW*cell_sz,
                                cell_sz, cell_sz)
@@ -85,12 +82,12 @@ def draw_grid():
 
 
 def update_grid():
-    SCREEN.fill(BLACK)
+    #SCREEN.fill(BLACK)
     counter = 0
     for ROW in range(ROWS):
         for COL in range(COLS):
             counter += 1
-            pass
+            print(counter, tuple((ROW, COL)))
     pygame.display.update()
     pygame.display.flip()
 
@@ -100,6 +97,10 @@ def main():
     global TURNS
     global enabled
     global attempts
+    global lives
+    global score
+    lives = 3
+    score = 0
     TURNS = 2
     attempts = 0
     pygame.init()
@@ -125,6 +126,12 @@ def main():
                 clicked_row = (event.pos[1] // cell_sz) + 1
                 # Translate col_row coord to a cell number
         game_stats_display()
+        update_grid()
+        draw_grid()
 
+
+def reset():
+    lives = 3
+    score = 0
 
 main()
