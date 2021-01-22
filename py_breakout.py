@@ -111,20 +111,33 @@ def draw_ball(col, row):
     pygame.draw.ellipse(SCREEN, BLUE, (col * cell_sz, row * cell_sz, cell_sz, cell_sz))
 
 
+def gen_mixer():
+    return random.uniform(0.05, 0.09)
+
+
 def move_ball():
-    mixer = random.uniform(0.1, 0.5)
     global ball_pos_row, ball_pos_col, bottom_edge, top_edge, left_edge, right_edge, start, game_running
-    global down, up, right, left
+    global down, up, right, left, mixer
+    if ball_pos_col < 1 or ball_pos_col > COLS - 1:
+        mixer = gen_mixer()
+    elif ball_pos_row < 2 or ball_pos_row > ROWS - 1:
+        mixer = gen_mixer()
+    else:
+        mixer = 0.1
     #print ("Ball row ", ball_pos_row, "Ball col ", ball_pos_col, " Bottom is", bottom_edge, " Top is", top_edge," Left is", left_edge, " Right is", right_edge, start, game_running)
     if start:
         ball_pos_row += ball_velocity
     if down and not bottom_edge:
+        #mixer = gen_mixer()
         ball_pos_row += ball_velocity + mixer
     if up and not top_edge:
+        #mixer = gen_mixer()
         ball_pos_row -= ball_velocity - mixer
     if right and not right_edge:
+        #mixer = gen_mixer()
         ball_pos_col += ball_velocity + mixer
     if left and not left_edge:
+        #mixer = gen_mixer()
         ball_pos_col -= ball_velocity - mixer
 
     if ball_pos_row > ROWS - 1:
