@@ -112,7 +112,9 @@ def draw_ball(col, row):
 
 
 def gen_mixer():
-    return random.uniform(0.05, 0.09)
+    mix = random.uniform(0.01, 0.39)
+    print(mix)
+    return mix
 
 
 def move_ball():
@@ -128,16 +130,12 @@ def move_ball():
     if start:
         ball_pos_row += ball_velocity
     if down and not bottom_edge:
-        #mixer = gen_mixer()
         ball_pos_row += ball_velocity + mixer
     if up and not top_edge:
-        #mixer = gen_mixer()
         ball_pos_row -= ball_velocity - mixer
     if right and not right_edge:
-        #mixer = gen_mixer()
         ball_pos_col += ball_velocity + mixer
     if left and not left_edge:
-        #mixer = gen_mixer()
         ball_pos_col -= ball_velocity - mixer
 
     if ball_pos_row > ROWS - 1:
