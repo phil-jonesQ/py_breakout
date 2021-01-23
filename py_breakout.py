@@ -12,23 +12,17 @@ import pygame
 import sys
 import os
 import random
+from game_objects import Ball, Bat
 from random import randint
 
-
 # Initialise Constants
-
 BLACK = (0, 0, 0)
 WHITE = (200, 200, 200)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 WINDOW_HEIGHT = 600
-WINDOW_WIDTH = 1200
-SCALE = 30
-ROWS = WINDOW_HEIGHT // SCALE
-COLS = WINDOW_WIDTH // SCALE
-cell_sz = WINDOW_HEIGHT // ROWS
-BAT_LENGTH = 4
-ball_pos_row = 5
+WINDOW_WIDTH = 900
+HUD_AREA = 60
 
 lives = 3
 score = 0
@@ -48,32 +42,12 @@ up = False
 right = False
 left = False
 
-SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 
-print(COLS, ROWS)
 
 pygame.font.init()  # you have to call this at the start,
 thefont = pygame.font.SysFont('Courier New', 20)
-
-images = {
-                    'ace of clubs': 'AC.png',
-                    'ace of diamonds': 'AD.png',
-
-}
-
-# Load Image set
-# Store in a dictionary so we can map the image to name
-card_images = {}
-path = "assets/"
-for name, file_name in images.items():
-    image = pygame.transform.scale(pygame.image.load(path + os.sep + file_name), (70, 90))
-    card_images[name] = image
-
-# Track the game state by storing each cell's card and if it's been revealed (True|False)
-cell_tracker = {}
-compare_tracker = {}
-matched_cells_tracker = []
 
 
 def game_stats_display():
@@ -85,30 +59,11 @@ def game_stats_display():
     textsurface2 = thefont.render(lives_string, False, (255, 255, 0))
     textsurface3 = thefont.render(message_string, False, (255, 0, 0))
 
-    SCREEN.blit(textsurface1, (15, 15))
-    SCREEN.blit(textsurface2, (205, 15))
-    SCREEN.blit(textsurface3, (WINDOW_WIDTH - 400, 15))
+    screen.blit(textsurface1, (15, 15))
+    screen.blit(textsurface2, (205, 15))
+    screen.blit(textsurface3, (WINDOW_WIDTH - 400, 15))
     pygame.display.update()
     pygame.display.flip()
-
-
-def draw_grid():
-    SCREEN.fill(BLACK)
-    for ROW in range(2, ROWS):
-        for COL in range(COLS):
-            rect = pygame.Rect(COL * cell_sz, ROW * cell_sz,
-                               cell_sz, cell_sz)
-            #pygame.draw.rect(SCREEN, BLACK, rect, 1)
-
-
-def draw_bat(col, row):
-    rect = pygame.Rect(col * cell_sz, row * cell_sz,
-                       cell_sz + BAT_LENGTH * cell_sz, cell_sz)
-    pygame.draw.rect(SCREEN, RED, rect, 0)
-
-
-def draw_ball(col, row):
-    pygame.draw.ellipse(SCREEN, BLUE, (col * cell_sz, row * cell_sz, cell_sz, cell_sz))
 
 
 def gen_mixer():
@@ -118,118 +73,101 @@ def gen_mixer():
 
 
 def move_ball():
-    global ball_pos_row, ball_pos_col, bottom_edge, top_edge, left_edge, right_edge, start, game_running
-    global down, up, right, left, mixer
-    if ball_pos_col < 1 or ball_pos_col > COLS - 1:
+    global start, bottom_edge, top_edge, left_edge, right_edge, mixer, up, down, right, left
+    # If start is true ball falls
+    if start:
+        ball.move(0, ball_speed)
+    # If the ball is near an edge generate some random velocity
+    if ball.x < 1 or ball.x > WINDOW_WIDTH - ball_size:
         mixer = gen_mixer()
-    elif ball_pos_row < 2 or ball_pos_row > ROWS - 1:
+    elif ball.y < HUD_AREA or ball.y > WINDOW_HEIGHT - bat_size:
         mixer = gen_mixer()
     else:
         mixer = 0.1
-    #print ("Ball row ", ball_pos_row, "Ball col ", ball_pos_col, " Bottom is", bottom_edge, " Top is", top_edge," Left is", left_edge, " Right is", right_edge, start, game_running)
-    if start:
-        ball_pos_row += ball_velocity
-    if down and not bottom_edge:
-        ball_pos_row += ball_velocity + mixer
-    if up and not top_edge:
-        ball_pos_row -= ball_velocity - mixer
-    if right and not right_edge:
-        ball_pos_col += ball_velocity + mixer
-    if left and not left_edge:
-        ball_pos_col -= ball_velocity - mixer
 
-    if ball_pos_row > ROWS - 1:
+    # Move ball depending where it is
+    if down and not bottom_edge:
+        mixer = gen_mixer()
+        ball.move(ball_speed + mixer, ball_speed + mixer)
+    if up and not top_edge:
+        mixer = gen_mixer()
+        ball.move(-ball_speed + mixer, -ball_speed + mixer)
+    if right and not right_edge:
+        mixer = gen_mixer()
+        ball.move(ball_speed + mixer, ball_speed + mixer)
+    if left and not left_edge:
+        mixer = gen_mixer()
+        ball.move(ball_speed + mixer, ball_speed + mixer)
+
+
+    # Constrain ball and update flags
+    if ball.y > (WINDOW_HEIGHT - bat_size):
         if start:
             start = False
+
         bottom_edge = True
-        up = True
-        down = False
-        right = True
         top_edge = False
-    if ball_pos_col < 1:
-        left_edge = True
-        right_edge = False
-        right = True
-        down = True
-    if ball_pos_row < 2:
-        top_edge = True
-        down = True
-        bottom_edge = False
-    if ball_pos_col > COLS - 1:
-        right_edge = True
-        left_edge = False
-        left = True
         up = True
-
-
-def update_grid():
-    counter = 0
-    for ROW in range(ROWS):
-        for COL in range(COLS):
-            counter += 1
-    pygame.display.update()
-    pygame.display.flip()
 
 
 def main():
-    global SCREEN, clock
-    global lives, score, ball_velocity, ball_pos_row, ball_pos_col, start, bat_pos_col, bat_pos_row, game_running
-    lives = 3
-    score = 0
-    ball_velocity = 1
-    bat_pos_row = ROWS - 1
-    bat_pos_col = (COLS // 2) - (BAT_LENGTH / 2)
-    ball_pos_row = ROWS // 2
-    ball_pos_col = COLS // 2
-    start = True
     pygame.init()
-    SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     clock = pygame.time.Clock()
     reset()
-    #draw_grid()
     pygame.key.set_repeat(1, 50)
-
     while True:
-        clock.tick(25)
+        clock.tick(60)
+        screen.fill(BLACK)
+        ball.draw()
+        bat.draw()
+        bat.clamp(WINDOW_WIDTH - bat_length)
+        move_ball()
+        game_stats_display()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             keys = pygame.key.get_pressed()
             if keys[pygame.K_DOWN]:
-                ball_pos_row += ball_velocity
+                pass
             if keys[pygame.K_RIGHT]:
-                bat_pos_col += 2
-                if (bat_pos_col + (BAT_LENGTH // 2)) > ((COLS - 1) - (BAT_LENGTH // 2)):
-                    bat_pos_col = ((COLS - 1) - BAT_LENGTH)
+                bat.move(bat_speed)
             if keys[pygame.K_LEFT]:
-                bat_pos_col -= 2
-                print(bat_pos_col, "edge", COLS)
-                if (bat_pos_col - (BAT_LENGTH // 2)) < - 1:
-                    bat_pos_col = 0
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                enabled = True
-                # Set the x, y positions of the mouse click
-                x, y = event.pos
-                # Translate x, y pos to grid coord
-                clicked_col = (event.pos[0] // cell_sz) + 1
-                clicked_row = (event.pos[1] // cell_sz) + 1
-                # Translate col_row coord to a cell number
-        game_stats_display()
-        update_grid()
-        draw_grid()
-        draw_bat(bat_pos_col, bat_pos_row)
-        draw_ball(ball_pos_col, ball_pos_row)
-        #print ((move_ball(ball_pos_col, ball_pos_row)[0]))
+                bat.move(- bat_speed)
         if start or game_running:
-            move_ball()
-            game_running = True
-        #ball_pos_row = move_ball(ball_pos_col, ball_pos_row)[0]
-        #ball_pos_col = move_ball(ball_pos_col, ball_pos_row)[1]
+            pass
+
+        # Update Display
+        pygame.display.update()
+        pygame.display.flip()
 
 
 def reset():
+    global screen, clock, start, ball_pos_x, ball_pos_y, bat_pos_x, bat_pos_y, ball, bat
+    global lives, score, ball_velocity, game_running, bat_length, bat_size, ball_size, bat_speed, ball_speed
+    global bottom_edge, top_edge, left_edge, right_edge, up, down, left, right
     lives = 3
     score = 0
+    start = True
+    top_edge = False
+    bottom_edge = False
+    left_edge = False
+    right_edge = False
+    up = False
+    down = False
+    right = False
+    left = False
+    bat_length = 125
+    bat_size = WINDOW_HEIGHT / 20
+    ball_size = 15
+    bat_speed = 20
+    ball_speed = 10
+    ball_pos_x = WINDOW_WIDTH / 2
+    ball_pos_y = HUD_AREA
+    bat_pos_x = (WINDOW_WIDTH - bat_length * 1.5) / 2
+    bat_pos_y = WINDOW_HEIGHT - bat_size
+    ball = Ball(ball_pos_x, ball_pos_y, ball_size, screen)
+    bat = Bat(bat_pos_x, bat_pos_y, bat_size, screen, RED, bat_length)
+
 
 main()
