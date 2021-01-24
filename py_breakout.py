@@ -260,7 +260,7 @@ def reset(soft):
     ball_size = 15
     brick_size = 20
     brick_length = 60
-    bat_speed = 40
+    bat_speed = 60
     ball_speed = 7
     wall_rows = 4
     ball_pos_x = WINDOW_WIDTH / 2
