@@ -10,11 +10,9 @@ Version 1.02 -
 
 import pygame
 import sys
-import os
 import random
 from game_objects import Ball, Bat
-from game_utils import collision
-from random import randint
+
 
 # Initialise Constants
 BLACK = (0, 0, 0)
