@@ -47,4 +47,26 @@ class Bat:
             self.x = 0
 
 
+class Brick:
+    def __init__(self, x, y, radius, screen, colour, length):
+        self.x = x
+        self.y = y
+        self.length = length
+        self.radius = radius
+        self.screen = screen
+        self.colour = colour
+        self.rect = pygame.Rect(x, y, radius + length, radius)
+
+    def draw(self):
+        self.rect = pygame.Rect(self.x, self.y, self.radius + self.length, self.radius)
+        pygame.draw.rect(self.screen, self.colour, self.rect, 0)
+
+    def collides_with_ball(self, ball):
+        collides = self.rect.colliderect(ball.rect)
+        if collides != 0:
+            return True
+        else:
+            return False
+
+
 

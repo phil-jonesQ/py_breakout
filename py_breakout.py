@@ -11,7 +11,7 @@ Version 1.02 - Ball bounces around correctly, need to add initial direction rand
 import pygame
 import sys
 import random
-from game_objects import Ball, Bat
+from game_objects import Ball, Bat, Brick
 
 
 # Initialise Constants
@@ -19,6 +19,7 @@ BLACK = (0, 0, 0)
 WHITE = (200, 200, 200)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+YELLOW = (255, 0, 255)
 WINDOW_HEIGHT = 600
 WINDOW_WIDTH = 900
 HUD_AREA = 60
@@ -76,8 +77,10 @@ def move_ball():
         mixer = gen_mixer()
     elif ball.y < HUD_AREA or ball.y > WINDOW_HEIGHT - bat_size:
         mixer = gen_mixer()
-    print(mixer)
+    #print(mixer)
     # Move ball depending where it is
+    collide_ball_to_brick(ball)
+
     if down and top_edge:
         if right_edge:
             #print("From the top Sending ball down and left")
@@ -163,6 +166,48 @@ def check_lose_life():
         reset(True)
 
 
+def generate_wall():
+    global brick, brick_size, brick_length, bricks
+    rows = 3
+    cols = WINDOW_WIDTH // brick_length
+    pad = 40
+    print ("There are cols", cols)
+    for row in range(1, rows):
+        for col in range(cols):
+            if row == 1:
+                bricks.append(
+                    Brick((col * brick_length), HUD_AREA, brick_size, screen, YELLOW, brick_length - pad))
+            else:
+                bricks.append(Brick((col * brick_length), (row * brick_size) + pad, brick_size, screen, YELLOW, brick_length - pad))
+
+    #brick = Brick(0, HUD_AREA, brick_size, screen, YELLOW, brick_length)
+
+
+def draw_wall():
+    for obj in range(len(bricks)):
+        bricks[obj].draw()
+        #print(bricks[obj].x, bricks[obj].y, bricks[obj].colour)
+
+
+def update_wall():
+    for obj in range(len(bricks)):
+        bricks[obj].draw()
+        #print(bricks[obj].x, bricks[obj].y, bricks[obj].colour)
+
+
+def collide_ball_to_brick(ball):
+    wall_length = 26
+    wall_length2 = len(bricks)
+    print("The amount of bricks is", str(wall_length2))
+    for obj in range(wall_length2 - 1):
+        if bricks[obj].collides_with_ball(ball):
+            print("Hit Brick Number", obj)
+            if bricks[obj]:
+                bricks.pop(obj)
+            return obj, bricks[obj].x, bricks[obj].y, True
+    return obj, bricks[obj].x, bricks[obj].y, False
+
+
 def main():
     pygame.init()
     clock = pygame.time.Clock()
@@ -173,6 +218,8 @@ def main():
         screen.fill(BLACK)
         ball.draw()
         bat.draw()
+        # Testing
+        update_wall()
         bat.clamp(WINDOW_WIDTH - bat_length)
         move_ball()
         check_lose_life()
@@ -197,12 +244,9 @@ def main():
 
 
 def reset(soft):
-    global screen, clock, start, ball_pos_x, ball_pos_y, bat_pos_x, bat_pos_y, ball, bat
-    global lives, score, ball_velocity, game_running, bat_length, bat_size, ball_size, bat_speed, ball_speed
+    global screen, clock, start, ball_pos_x, ball_pos_y, bat_pos_x, bat_pos_y, ball, bat, brick, bricks
+    global lives, score, game_running, bat_length, bat_size, ball_size, bat_speed, ball_speed, brick_size, brick_length
     global bottom_edge, top_edge, left_edge, right_edge, up, down, left, right
-    if not soft:
-        lives = 3
-        score = 0
     start = True
     top_edge = False
     bottom_edge = False
@@ -215,14 +259,25 @@ def reset(soft):
     bat_length = 125
     bat_size = WINDOW_HEIGHT / 20
     ball_size = 15
+    brick_size = 30
+    brick_length = 60
     bat_speed = 40
     ball_speed = 7
+    #ball_speed = 1
     ball_pos_x = WINDOW_WIDTH / 2
     ball_pos_y = HUD_AREA
     bat_pos_x = (WINDOW_WIDTH - bat_length * 1.5) / 2
     bat_pos_y = WINDOW_HEIGHT - bat_size
     ball = Ball(ball_pos_x, ball_pos_y, ball_size, screen)
     bat = Bat(bat_pos_x, bat_pos_y, bat_size, screen, RED, bat_length)
+    if not soft:
+        lives = 3
+        score = 0
+        bricks = []
+        generate_wall()
+        draw_wall()
+
+
 
 
 main()
