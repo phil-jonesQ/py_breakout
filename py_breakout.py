@@ -61,7 +61,7 @@ def game_stats_display():
 
 
 def gen_mixer():
-    mix = random.uniform(0.1, 2)
+    mix = random.uniform(0.1, 4)
     return mix
 
 
@@ -70,43 +70,42 @@ def move_ball():
     # If start is true ball falls
     if start:
         ball.move(0, ball_speed)
-        mixer = 1
+        mixer = gen_mixer()
     # If the ball is near an edge generate some random velocity
     if ball.x < 1 or ball.x > WINDOW_WIDTH - ball_size:
         mixer = gen_mixer()
     elif ball.y < HUD_AREA or ball.y > WINDOW_HEIGHT - bat_size:
         mixer = gen_mixer()
-    #print(mixer)
+    print(mixer)
     # Move ball depending where it is
     if down and top_edge:
         if right_edge:
             #print("From the top Sending ball down and left")
-            ball.move(-ball_speed + mixer, ball_speed + mixer)
+            ball.move(-ball_speed - mixer, ball_speed + mixer)
         else:
             #print("From the top Sending ball down and right")
             ball.move(ball_speed + mixer, ball_speed + mixer)
 
     if up and bottom_edge:
         # Need to add logic to send other direction depending on part hit on bat
-        #right_edge = True
         if right_edge:
             #print("From the bottom sending ball left and up")
-            ball.move(-ball_speed + mixer, -ball_speed + mixer)
+            ball.move(-ball_speed - mixer, -ball_speed - mixer)
         if left_edge:
             #print("From the bottom sending ball right and up")
-            ball.move(ball_speed + mixer, -ball_speed + mixer)
+            ball.move(ball_speed + mixer, -ball_speed - mixer)
 
     if right and left_edge:
         if bottom_edge:
             #print("From the left sending ball right and up")
-            ball.move(ball_speed + mixer, -ball_speed + mixer)
+            ball.move(ball_speed + mixer, -ball_speed - mixer)
         if top_edge:
             #print("From the left sending ball right and down")
             ball.move(ball_speed + mixer, ball_speed + mixer)
     if left and right_edge:
         if bottom_edge:
             #print("From the right sending ball left and up")
-            ball.move(-ball_speed + mixer, -ball_speed + mixer)
+            ball.move(-ball_speed + mixer, -ball_speed - mixer)
         if top_edge:
             #print("From the right sending ball left and down")
             ball.move(-ball_speed + mixer, ball_speed + mixer)
@@ -115,8 +114,11 @@ def move_ball():
     if ball.y > (WINDOW_HEIGHT - bat_size):
         if start:
             start = False
-            # Depends which way from start
-            right_edge = True
+            # Mix deflection off from start
+            if mixer > 2:
+                right_edge = True
+            else:
+                left_edge = True
         up = True
         down = False
         right = False
@@ -213,7 +215,7 @@ def reset(soft):
     bat_length = 125
     bat_size = WINDOW_HEIGHT / 20
     ball_size = 15
-    bat_speed = 25
+    bat_speed = 40
     ball_speed = 7
     ball_pos_x = WINDOW_WIDTH / 2
     ball_pos_y = HUD_AREA

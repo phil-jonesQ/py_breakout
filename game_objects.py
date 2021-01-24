@@ -7,7 +7,7 @@ class Ball:
         self.y = y
         self.radius = radius
         self.screen = screen
-        self.rect = pygame.Rect(x - radius / 2, y - radius / 2, radius * 1.5, radius * 1.5)
+        self.rect = pygame.Rect(x - radius / 2, y - radius / 2, radius, radius)
 
     def move(self, direction_x, direction_y):
         self.x += direction_x
@@ -15,7 +15,8 @@ class Ball:
 
     def draw(self):
         pygame.draw.circle(self.screen, (0, 0, 255), [self.x, self.y], self.radius)
-        self.rect = pygame.Rect(self.x - self.radius / 2, self.y - self.radius / 2, self.radius * 1.5, self.radius * 1.5)
+        # Tweak size of Rect to how accurate the collision detection is needed
+        self.rect = pygame.Rect(self.x - self.radius, self.y - self.radius, self.radius * 2.5, self.radius * 2.5)
         #pygame.draw.rect(self.screen, ((255, 0 ,0)), self.rect, 0)
 
     def collides_with_bat(self, bat):
