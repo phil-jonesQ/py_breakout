@@ -130,7 +130,7 @@ def move_ball():
         bottom_edge = True
         top_edge = False
 
-    if ball.x < 0:
+    if ball.x < 0 or hit_brick:
         right = True
         left = False
         up = False
@@ -148,7 +148,7 @@ def move_ball():
         top_edge = True
         bottom_edge = False
 
-    if ball.x > WINDOW_WIDTH - ball_size:
+    if ball.x > WINDOW_WIDTH - ball_size or hit_brick:
         left = True
         down = False
         up = False
@@ -169,16 +169,12 @@ def check_lose_life():
 def generate_wall():
     global brick, brick_size, brick_length, bricks, wall_rows
     cols = WINDOW_WIDTH // brick_length
-    pad = 40
+    pad = 30
     print ("There are cols", cols)
     for row in range(wall_rows):
         for col in range(cols):
-            #pad += 2
-            if row > 0:
-                bricks.append(
-                    Brick((col * brick_length), HUD_AREA + pad, brick_size, screen, YELLOW, brick_length - pad))
-            else:
-                bricks.append(Brick((col * brick_length), (row * brick_size) + pad, brick_size, screen, YELLOW, brick_length - pad))
+            bricks.append(
+                    Brick((col * brick_length), (row * brick_size) + HUD_AREA, 15, screen, YELLOW, brick_length - pad))
 
     #brick = Brick(0, HUD_AREA, brick_size, screen, YELLOW, brick_length)
 
@@ -262,7 +258,7 @@ def reset(soft):
     bat_length = 125
     bat_size = WINDOW_HEIGHT / 20
     ball_size = 15
-    brick_size = 30
+    brick_size = 20
     brick_length = 60
     bat_speed = 40
     ball_speed = 7
