@@ -1,9 +1,9 @@
-""" Version 1.00 - breakout style.. Grid Based Game
+""" Version 1.00 - breakout style..
 
 Phil Jones - Jan 2021
 
-Version 1.01 - Draws Grid And Can Exist
-Version 1.02 -
+Version 1.01 - Abandon grid method and use game objects to take advantage of pygame rectangle collision detection
+Version 1.02 - Ball bounces around correctly, need to add initial direction randomise next
 
 """
 
