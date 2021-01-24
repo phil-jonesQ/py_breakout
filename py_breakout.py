@@ -79,7 +79,7 @@ def move_ball():
         mixer = gen_mixer()
     #print(mixer)
     # Move ball depending where it is
-    collide_ball_to_brick(ball)
+    hit_brick = collide_ball_to_brick(ball)
 
     if down and top_edge:
         if right_edge:
@@ -114,7 +114,7 @@ def move_ball():
             ball.move(-ball_speed + mixer, ball_speed + mixer)
 
     # Constrain ball and update flags
-    if ball.y > (WINDOW_HEIGHT - bat_size):
+    if ball.y > (WINDOW_HEIGHT - bat_size) or hit_brick:
         if start:
             start = False
             # Mix deflection off from start
@@ -139,7 +139,7 @@ def move_ball():
         left_edge = True
         right_edge = False
 
-    if ball.y < HUD_AREA:
+    if ball.y < HUD_AREA or hit_brick:
         down = True
         up = False
         left = False
@@ -167,16 +167,16 @@ def check_lose_life():
 
 
 def generate_wall():
-    global brick, brick_size, brick_length, bricks
-    rows = 3
+    global brick, brick_size, brick_length, bricks, wall_rows
     cols = WINDOW_WIDTH // brick_length
     pad = 40
     print ("There are cols", cols)
-    for row in range(1, rows):
+    for row in range(wall_rows):
         for col in range(cols):
-            if row == 1:
+            #pad += 2
+            if row > 0:
                 bricks.append(
-                    Brick((col * brick_length), HUD_AREA, brick_size, screen, YELLOW, brick_length - pad))
+                    Brick((col * brick_length), HUD_AREA + pad, brick_size, screen, YELLOW, brick_length - pad))
             else:
                 bricks.append(Brick((col * brick_length), (row * brick_size) + pad, brick_size, screen, YELLOW, brick_length - pad))
 
@@ -196,16 +196,19 @@ def update_wall():
 
 
 def collide_ball_to_brick(ball):
-    wall_length = 26
-    wall_length2 = len(bricks)
-    print("The amount of bricks is", str(wall_length2))
-    for obj in range(wall_length2 - 1):
-        if bricks[obj].collides_with_ball(ball):
-            print("Hit Brick Number", obj)
-            if bricks[obj]:
-                bricks.pop(obj)
-            return obj, bricks[obj].x, bricks[obj].y, True
-    return obj, bricks[obj].x, bricks[obj].y, False
+    brick_amount = len(bricks)
+    count = -2
+    print("The amount of bricks is", str(brick_amount))
+    for obj in range(brick_amount):
+        count += 1
+        if bricks[count].collides_with_ball(ball):
+            print("Hit Brick Number", count)
+            if bricks[count]:
+                bricks.pop(count)
+            if count == -1:
+                return 0, 0, 0, True
+            return count, bricks[count].x, bricks[count].y, True
+
 
 
 def main():
@@ -246,7 +249,7 @@ def main():
 def reset(soft):
     global screen, clock, start, ball_pos_x, ball_pos_y, bat_pos_x, bat_pos_y, ball, bat, brick, bricks
     global lives, score, game_running, bat_length, bat_size, ball_size, bat_speed, ball_speed, brick_size, brick_length
-    global bottom_edge, top_edge, left_edge, right_edge, up, down, left, right
+    global bottom_edge, top_edge, left_edge, right_edge, up, down, left, right, wall_rows
     start = True
     top_edge = False
     bottom_edge = False
@@ -263,9 +266,9 @@ def reset(soft):
     brick_length = 60
     bat_speed = 40
     ball_speed = 7
-    #ball_speed = 1
+    wall_rows = 4
     ball_pos_x = WINDOW_WIDTH / 2
-    ball_pos_y = HUD_AREA
+    ball_pos_y = HUD_AREA * wall_rows
     bat_pos_x = (WINDOW_WIDTH - bat_length * 1.5) / 2
     bat_pos_y = WINDOW_HEIGHT - bat_size
     ball = Ball(ball_pos_x, ball_pos_y, ball_size, screen)
