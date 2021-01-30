@@ -66,6 +66,43 @@ def gen_mixer():
     return mix
 
 
+def deflect_ball(direction):
+    """ Method to set flags depending on direction string passed in"""
+    global start, bottom_edge, top_edge, left_edge, right_edge, up, down, right, left
+    if direction == "up":
+        up = True
+        down = False
+        right = False
+        left = False
+        # Edge States
+        bottom_edge = True
+        top_edge = False
+    if direction == "right":
+        right = True
+        left = False
+        up = False
+        down = False
+        # Edge States
+        left_edge = True
+        right_edge = False
+    if direction == "down":
+        down = True
+        up = False
+        left = False
+        right = False
+        # Edge States
+        top_edge = True
+        bottom_edge = False
+    if direction == "left":
+        left = True
+        down = False
+        up = False
+        right = False
+        # Edge States
+        right_edge = True
+        left_edge = False
+
+
 def move_ball():
     global start, bottom_edge, top_edge, left_edge, right_edge, mixer, up, down, right, left
     # If start is true ball falls
@@ -77,44 +114,41 @@ def move_ball():
         mixer = gen_mixer()
     elif ball.y < HUD_AREA or ball.y > WINDOW_HEIGHT - bat_size:
         mixer = gen_mixer()
-    #print(mixer)
-    # Move ball depending where it is
+    # Set the hit_brick flag if the ball has collided with a brick
+    # The collide_ball_brick method also iterates over every brick and removes
+    # the one it has collided with
     hit_brick = collide_ball_to_brick(ball)
 
+    # If down flag and coming from the top
     if down and top_edge:
         if right_edge:
-            #print("From the top Sending ball down and left")
             ball.move(-ball_speed - mixer, ball_speed + mixer)
         else:
-            #print("From the top Sending ball down and right")
             ball.move(ball_speed + mixer, ball_speed + mixer)
 
+    # If up flag and coming from the bottom
     if up and bottom_edge:
-        # Need to add logic to send other direction depending on part hit on bat
         if right_edge:
-            #print("From the bottom sending ball left and up")
             ball.move(-ball_speed - mixer, -ball_speed - mixer)
         if left_edge:
-            #print("From the bottom sending ball right and up")
             ball.move(ball_speed + mixer, -ball_speed - mixer)
 
+    # If right flag and coming from the left edge
     if right and left_edge:
         if bottom_edge:
-            #print("From the left sending ball right and up")
             ball.move(ball_speed + mixer, -ball_speed - mixer)
         if top_edge:
-            #print("From the left sending ball right and down")
             ball.move(ball_speed + mixer, ball_speed + mixer)
+
+    # If left flag and coming from the right edge
     if left and right_edge:
         if bottom_edge:
-            #print("From the right sending ball left and up")
             ball.move(-ball_speed + mixer, -ball_speed - mixer)
         if top_edge:
-            #print("From the right sending ball left and down")
             ball.move(-ball_speed + mixer, ball_speed + mixer)
 
-    # Constrain ball and update flags
-    if ball.y > (WINDOW_HEIGHT - bat_size) or hit_brick:
+    # Constrain ball and update flags for the ball behaviour
+    if ball.y > (WINDOW_HEIGHT - bat_size):
         if start:
             start = False
             # Mix deflection off from start
@@ -122,40 +156,46 @@ def move_ball():
                 right_edge = True
             else:
                 left_edge = True
-        up = True
-        down = False
-        right = False
-        left = False
-        # Edge States
-        bottom_edge = True
-        top_edge = False
+        deflect_ball("up")
 
-    if ball.x < 0 or hit_brick:
-        right = True
-        left = False
-        up = False
-        down = False
-        # Edge States
-        left_edge = True
-        right_edge = False
+    if ball.x < 0:
+        deflect_ball("right")
 
-    if ball.y < HUD_AREA or hit_brick:
-        down = True
-        up = False
-        left = False
-        right = False
-        # Edge States
-        top_edge = True
-        bottom_edge = False
+    if ball.y < HUD_AREA:
+        deflect_ball("down")
 
-    if ball.x > WINDOW_WIDTH - ball_size or hit_brick:
-        left = True
-        down = False
-        up = False
-        right = False
-        # Edge States
-        right_edge = True
-        left_edge = False
+    if ball.x > WINDOW_WIDTH - ball_size:
+        deflect_ball("left")
+
+    # Handle direction change when the ball has hit a brick
+
+    if up and bottom_edge and hit_brick:
+        print("up and from bottom ", mixer)
+        deflect_ball("down")
+
+    if right and bottom_edge and hit_brick:
+        print("right and from bottom", mixer)
+        deflect_ball("down")
+
+    if left and bottom_edge and hit_brick:
+        print("left and from bottom", mixer)
+        deflect_ball("up")
+
+    if down and bottom_edge and hit_brick:
+        print("down and and from bottom", mixer)
+        deflect_ball("down")
+
+    if down and top_edge and hit_brick:
+        print("Down and from top ", mixer)
+        deflect_ball("up")
+
+    if left and top_edge and hit_brick:
+        print("down and hit from left", mixer)
+        deflect_ball("right")
+
+    if right and top_edge and hit_brick:
+        print("down and hit from right", mixer)
+        deflect_ball("left")
 
 
 def check_lose_life():
@@ -170,7 +210,6 @@ def generate_wall():
     global brick, brick_size, brick_length, bricks, wall_rows
     cols = WINDOW_WIDTH // brick_length
     pad = 30
-    print ("There are cols", cols)
     for row in range(wall_rows):
         for col in range(cols):
             bricks.append(
@@ -192,19 +231,19 @@ def update_wall():
 
 
 def collide_ball_to_brick(ball):
+    global up, down, left, right
     brick_amount = len(bricks)
     count = -2
-    print("The amount of bricks is", str(brick_amount))
+    #print("The amount of bricks is", str(brick_amount))
     for obj in range(brick_amount):
         count += 1
         if bricks[count].collides_with_ball(ball):
-            print("Hit Brick Number", count)
+            #print("Hit Brick Number ", count, "Direction of ball is ", up, down, left, right)
             if bricks[count]:
                 bricks.pop(count)
             if count == -1:
                 return 0, 0, 0, True
             return count, bricks[count].x, bricks[count].y, True
-
 
 
 def main():
@@ -256,8 +295,8 @@ def reset(soft):
     right = False
     left = False
     bat_length = 125
-    bat_size = WINDOW_HEIGHT / 20
-    ball_size = 15
+    bat_size = WINDOW_HEIGHT / 30
+    ball_size = 8
     brick_size = 20
     brick_length = 60
     bat_speed = 60
