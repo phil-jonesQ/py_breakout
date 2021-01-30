@@ -104,7 +104,7 @@ def deflect_ball(direction):
 
 
 def move_ball():
-    global start, bottom_edge, top_edge, left_edge, right_edge, mixer, up, down, right, left
+    global start, bottom_edge, top_edge, left_edge, right_edge, mixer, up, down, right, left, hit_brick
     # If start is true ball falls
     if start:
         ball.move(0, ball_speed)
@@ -169,35 +169,20 @@ def move_ball():
 
     # Handle direction change when the ball has hit a brick
 
-    if up and bottom_edge and hit_brick:
-        print("up and from bottom ", mixer)
-        if mixer > 3:
+    if hit_brick:
+        if bottom_edge:
             deflect_ball("down")
-        else:
+            return
+        if top_edge:
             deflect_ball("up")
+            return
+        if left_edge:
+            deflect_ball("left")
+            return
+        if right_edge:
+            deflect_ball("right")
+            return
 
-    if right and bottom_edge and hit_brick:
-        print("right and from bottom", mixer)
-        deflect_ball("down")
-
-    if left and bottom_edge and hit_brick:
-        print("left and from bottom", mixer)
-        deflect_ball("up")
-
-    if down and top_edge and hit_brick:
-        print("Down and from top ", mixer)
-        if mixer > 3:
-            deflect_ball("down")
-        else:
-            deflect_ball("up")
-
-    if left and top_edge and hit_brick:
-        print("down and hit from left", mixer)
-        deflect_ball("right")
-
-    if right and top_edge and hit_brick:
-        print("down and hit from right", mixer)
-        deflect_ball("left")
 
 
 def check_lose_life():
@@ -214,8 +199,12 @@ def generate_wall():
     pad = 30
     for row in range(wall_rows):
         for col in range(cols):
-            bricks.append(
+            if row % 2 == 0:
+                bricks.append(
                     Brick((col * brick_length), (row * brick_size) + HUD_AREA, 15, screen, YELLOW, brick_length - pad))
+            else:
+                bricks.append(
+                    Brick((col * (brick_length + 2)), (row * brick_size) + HUD_AREA, 15, screen, YELLOW, brick_length - pad))
 
     #brick = Brick(0, HUD_AREA, brick_size, screen, YELLOW, brick_length)
 
@@ -240,7 +229,7 @@ def collide_ball_to_brick(ball):
     for obj in range(brick_amount):
         count += 1
         if bricks[count].collides_with_ball(ball):
-            #print("Hit Brick Number ", count, "Direction of ball is ", up, down, left, right)
+            print("Hit Brick Number ", count, "Direction of ball is ", up, down, left, right)
             if bricks[count]:
                 bricks.pop(count)
             if count == -1:
