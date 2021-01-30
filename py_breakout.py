@@ -171,7 +171,10 @@ def move_ball():
 
     if up and bottom_edge and hit_brick:
         print("up and from bottom ", mixer)
-        deflect_ball("down")
+        if mixer > 3:
+            deflect_ball("down")
+        else:
+            deflect_ball("up")
 
     if right and bottom_edge and hit_brick:
         print("right and from bottom", mixer)
@@ -181,13 +184,12 @@ def move_ball():
         print("left and from bottom", mixer)
         deflect_ball("up")
 
-    if down and bottom_edge and hit_brick:
-        print("down and and from bottom", mixer)
-        deflect_ball("down")
-
     if down and top_edge and hit_brick:
         print("Down and from top ", mixer)
-        deflect_ball("up")
+        if mixer > 3:
+            deflect_ball("down")
+        else:
+            deflect_ball("up")
 
     if left and top_edge and hit_brick:
         print("down and hit from left", mixer)
