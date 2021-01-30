@@ -20,6 +20,7 @@ WHITE = (200, 200, 200)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 0, 255)
+CYAN = (0, 255, 255)
 WINDOW_HEIGHT = 600
 WINDOW_WIDTH = 900
 HUD_AREA = 60
@@ -168,21 +169,19 @@ def move_ball():
         deflect_ball("left")
 
     # Handle direction change when the ball has hit a brick
-
     if hit_brick:
-        if bottom_edge:
+        if up:
             deflect_ball("down")
             return
-        if top_edge:
+        if down:
             deflect_ball("up")
             return
-        if left_edge:
-            deflect_ball("left")
-            return
-        if right_edge:
+        if left:
             deflect_ball("right")
             return
-
+        if right:
+            deflect_ball("left")
+            return
 
 
 def check_lose_life():
@@ -201,35 +200,31 @@ def generate_wall():
         for col in range(cols):
             if row % 2 == 0:
                 bricks.append(
-                    Brick((col * brick_length), (row * brick_size) + HUD_AREA, 15, screen, YELLOW, brick_length - pad))
+                    Brick((col * brick_length), (row * brick_size) + HUD_AREA, 10, screen, YELLOW, brick_length - pad))
             else:
                 bricks.append(
-                    Brick((col * (brick_length + 2)), (row * brick_size) + HUD_AREA, 15, screen, YELLOW, brick_length - pad))
-
-    #brick = Brick(0, HUD_AREA, brick_size, screen, YELLOW, brick_length)
+                    Brick((col * brick_length), (row * brick_size) + HUD_AREA, 10, screen, CYAN, brick_length - pad))
 
 
 def draw_wall():
     for obj in range(len(bricks)):
         bricks[obj].draw()
-        #print(bricks[obj].x, bricks[obj].y, bricks[obj].colour)
 
 
 def update_wall():
     for obj in range(len(bricks)):
         bricks[obj].draw()
-        #print(bricks[obj].x, bricks[obj].y, bricks[obj].colour)
 
 
 def collide_ball_to_brick(ball):
-    global up, down, left, right
+    global up, down, left, right, score
     brick_amount = len(bricks)
     count = -2
-    #print("The amount of bricks is", str(brick_amount))
     for obj in range(brick_amount):
         count += 1
         if bricks[count].collides_with_ball(ball):
-            print("Hit Brick Number ", count, "Direction of ball is ", up, down, left, right)
+            #print("Hit Brick Number ", count, "Direction of ball is ", up, down, left, right)
+            score += 1
             if bricks[count]:
                 bricks.pop(count)
             if count == -1:
@@ -243,7 +238,7 @@ def main():
     reset(False)
     pygame.key.set_repeat(1, 50)
     while True:
-        clock.tick(60)
+        clock.tick(30)
         screen.fill(BLACK)
         ball.draw()
         bat.draw()
@@ -292,7 +287,7 @@ def reset(soft):
     brick_length = 60
     bat_speed = 60
     ball_speed = 7
-    wall_rows = 4
+    wall_rows = 6
     ball_pos_x = WINDOW_WIDTH / 2
     ball_pos_y = HUD_AREA * wall_rows
     bat_pos_x = (WINDOW_WIDTH - bat_length * 1.5) / 2
@@ -305,8 +300,6 @@ def reset(soft):
         bricks = []
         generate_wall()
         draw_wall()
-
-
 
 
 main()
