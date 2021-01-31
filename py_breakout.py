@@ -46,7 +46,6 @@ lose_life_sound = pygame.mixer.Sound("assets/life_loss.wav")
 
 def game_stats_display(state_string):
     score_string = "SCORE " + str(score)
-    lives_string = "LIVES " + str(lives)
     level_string = "LEVEL " + str(level)
     if state_string == "GAMEOVER":
         message_string = "GAME-OVER SPACE TO RESTART.."
@@ -235,10 +234,8 @@ def collide_ball_to_brick(ball):
     for obj in range(brick_amount):
         count += 1
         if bricks[count].collides_with_ball(ball):
-            #print("Score is ", score, level_target_bricks)
             if score == level_target_bricks - 1:
                 level_complete = True
-                print(level_complete)
             if bricks[count]:
                 bricks.pop(count)
                 score += 1
