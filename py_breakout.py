@@ -225,11 +225,11 @@ def collide_ball_to_brick(ball):
     for obj in range(brick_amount):
         count += 1
         if bricks[count].collides_with_ball(ball):
-            score += 1
             if score == level_target_bricks:
                 level_complete = True
             if bricks[count]:
                 bricks.pop(count)
+                score += 1
             if count == -1:
                 return 0, 0, 0, True
             return count, bricks[count].x, bricks[count].y, True
