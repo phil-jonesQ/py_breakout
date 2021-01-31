@@ -6,6 +6,7 @@ Version 1.01 - Abandon grid method and use game objects to take advantage of pyg
 Version 1.02 - Ball bounces around correctly, need to add initial direction randomise next
 Version 1.03 - Working Game with basic level system
 Version 1.04 - Add sound effects and improve bat clamp
+Version 1.05 - Add pause and demo feature
 
 """
 
@@ -29,6 +30,7 @@ HUD_AREA = 60
 
 start = True
 game_running = False
+demo = True
 
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
@@ -44,16 +46,18 @@ bat_hit_sound = pygame.mixer.Sound("assets/bat_hit.wav")
 lose_life_sound = pygame.mixer.Sound("assets/life_loss.wav")
 
 
-
 def game_stats_display(state_string):
+    global demo
     score_string = "SCORE " + str(score)
     level_string = "LEVEL " + str(level)
     if state_string == "GAMEOVER":
         message_string = "GAME-OVER SPACE TO RESTART.."
         lives_string = "LIVES 0"
     else:
-        message_string = "SPACE TO RESTART.."
+        message_string = "SPACE TO RESTART.. P TO PAUSE"
         lives_string = "LIVES " + str(lives)
+    if demo:
+        message_string = "DEMO MODE... S to START"
 
     textsurface1 = thefont.render(score_string, False, (0, 255, 0))
     textsurface2 = thefont.render(lives_string, False, (255, 255, 0))
@@ -246,7 +250,21 @@ def collide_ball_to_brick(ball):
             return count, bricks[count].x, bricks[count].y, True
 
 
+def paused():
+    global pause
+    while pause:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_p] and pause:
+                pause = False
+                pygame.time.wait(100)
+
+
 def main():
+    global pause, demo
     pygame.init()
     clock = pygame.time.Clock()
     # Hard reset Game Vars
@@ -259,6 +277,16 @@ def main():
         bat.draw()
         update_wall()
         bat.clamp(WINDOW_WIDTH)
+        # Handle demo mode
+        if demo:
+            # Auto play the game
+            if bat.x < ball.x and ball.y > WINDOW_HEIGHT - 250:
+                bat.move(50)
+            if bat.x > ball.x and ball.y > WINDOW_HEIGHT - 250:
+                bat.move(-50)
+        # Check if we've been paused
+        if pause:
+            paused()
         if not game_over:
             move_ball()
             check_lose_life()
@@ -273,11 +301,17 @@ def main():
                 pygame.quit()
                 sys.exit()
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_SPACE]:
+            if keys[pygame.K_p] and not game_over and not pause and not demo:
+                pause = True
+                pygame.time.wait(100)
+            if keys[pygame.K_s] and not game_over:
+                demo = False
                 reset(False)
-            if keys[pygame.K_RIGHT] and not game_over:
+            if keys[pygame.K_SPACE] and not demo:
+                reset(False)
+            if keys[pygame.K_RIGHT] and not game_over and not demo:
                 bat.move(bat_speed)
-            if keys[pygame.K_LEFT] and not game_over:
+            if keys[pygame.K_LEFT] and not game_over and not demo:
                 bat.move(- bat_speed)
         if start or game_running:
             pass
@@ -288,10 +322,11 @@ def main():
 
 
 def reset(soft):
-    global screen, clock, start, ball_pos_x, ball_pos_y, bat_pos_x, bat_pos_y, ball, bat, brick, bricks
+    global screen, clock, start, ball_pos_x, ball_pos_y, bat_pos_x, bat_pos_y, ball, bat, brick, bricks, pause, demo
     global lives, score, game_running, bat_length, bat_size, ball_size, bat_speed, ball_speed, brick_size, brick_length
     global bottom_edge, top_edge, left_edge, right_edge, up, down, left, right, wall_rows, level_complete, level, game_over
     start = True
+    pause = False
     top_edge = False
     bottom_edge = False
     left_edge = False
@@ -300,6 +335,7 @@ def reset(soft):
     down = False
     right = False
     left = False
+    #bat_length = WINDOW_WIDTH
     bat_length = 125
     bat_size = WINDOW_HEIGHT / 30
     ball_size = 8
@@ -335,6 +371,7 @@ def reset(soft):
         down = False
         right = False
         left = False
+        #bat_length = WINDOW_WIDTH
         bat_length = 125
         bat_size = WINDOW_HEIGHT / 30
         ball_size = 8
