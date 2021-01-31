@@ -6,6 +6,7 @@ Version 1.01 - Abandon grid method and use game objects to take advantage of pyg
 Version 1.02 - Ball bounces around correctly, need to add initial direction randomise next
 Version 1.03 - Working Game with basic level system
 Version 1.04 - Add sound effects and improve bat clamp
+
 """
 
 
