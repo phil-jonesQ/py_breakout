@@ -41,10 +41,14 @@ class Bat:
         pygame.draw.rect(self.screen, self.colour, self.rect, 0)
 
     def clamp(self, max_width):
-        if self.x > max_width:
-            self.x = max_width
+
+        if self.x + (self.length + 50) > max_width:
+            self.x = max_width - (self.length + 20)
+            return True
         if self.x < 0:
             self.x = 0
+            return True
+        return False
 
 
 class Brick:

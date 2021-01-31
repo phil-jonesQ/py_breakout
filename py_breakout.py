@@ -5,6 +5,7 @@ Phil Jones - Jan 2021
 Version 1.01 - Abandon grid method and use game objects to take advantage of pygame rectangle collision detection
 Version 1.02 - Ball bounces around correctly, need to add initial direction randomise next
 Version 1.03 - Working Game with basic level system
+Version 1.04 - Add sound effects and improve bat clamp
 """
 
 
@@ -34,6 +35,13 @@ clock = pygame.time.Clock()
 
 pygame.font.init()  # you have to call this at the start,
 thefont = pygame.font.SysFont('Courier New', 20)
+
+# Load Sound effects
+pygame.mixer.init()
+brick_break_sound = pygame.mixer.Sound("assets/click.wav")
+bat_hit_sound = pygame.mixer.Sound("assets/bat_hit.wav")
+lose_life_sound = pygame.mixer.Sound("assets/life_loss.wav")
+
 
 
 def game_stats_display(state_string):
@@ -155,6 +163,7 @@ def move_ball():
                 right_edge = True
             else:
                 left_edge = True
+        pygame.mixer.Sound.play(bat_hit_sound)
         deflect_ball("up")
 
     if ball.x < 0:
@@ -186,6 +195,7 @@ def check_lose_life():
     global lives, game_over
     if not ball.collides_with_bat(bat) and ball.y > WINDOW_HEIGHT - bat_size:
         lives -= 1
+        pygame.mixer.Sound.play(lose_life_sound)
         if lives < 0:
             game_over = True
         else:
@@ -225,11 +235,14 @@ def collide_ball_to_brick(ball):
     for obj in range(brick_amount):
         count += 1
         if bricks[count].collides_with_ball(ball):
-            if score == level_target_bricks:
+            #print("Score is ", score, level_target_bricks)
+            if score == level_target_bricks - 1:
                 level_complete = True
+                print(level_complete)
             if bricks[count]:
                 bricks.pop(count)
                 score += 1
+                pygame.mixer.Sound.play(brick_break_sound)
             if count == -1:
                 return 0, 0, 0, True
             return count, bricks[count].x, bricks[count].y, True
@@ -242,12 +255,12 @@ def main():
     reset(False)
     pygame.key.set_repeat(1, 50)
     while True:
-        clock.tick(30)
+        clock.tick(45)
         screen.fill(BLACK)
         ball.draw()
         bat.draw()
         update_wall()
-        bat.clamp(WINDOW_WIDTH - bat_length)
+        bat.clamp(WINDOW_WIDTH)
         if not game_over:
             move_ball()
             check_lose_life()
