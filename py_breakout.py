@@ -196,14 +196,18 @@ def move_ball():
 
 
 def check_lose_life():
-    global lives, game_over
+    global lives, game_over, demo
     if not ball.collides_with_bat(bat) and ball.y > WINDOW_HEIGHT - bat_size:
         lives -= 1
         pygame.mixer.Sound.play(lose_life_sound)
-        if lives < 0:
+        if demo and lives < 1:
+            lives = 9
+        if lives < 0 and not demo:
             game_over = True
         else:
             reset(True)
+
+
 
 
 def generate_wall():
