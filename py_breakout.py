@@ -348,7 +348,7 @@ def reset(soft):
     bat_speed = 60
     ball_speed = 7
     ball_pos_x = WINDOW_WIDTH / 2
-    ball_pos_y = HUD_AREA * 8
+    ball_pos_y = WINDOW_HEIGHT - bat_size
     bat_pos_x = (WINDOW_WIDTH - bat_length * 1.5) / 2
     bat_pos_y = WINDOW_HEIGHT - bat_size
     ball = Ball(ball_pos_x, ball_pos_y, ball_size, screen)
@@ -384,7 +384,7 @@ def reset(soft):
         bat_speed = 60
         ball_speed += 0.5
         ball_pos_x = WINDOW_WIDTH / 2
-        ball_pos_y = HUD_AREA * 8
+        ball_pos_y = WINDOW_HEIGHT - bat_size
         bat_pos_x = (WINDOW_WIDTH - bat_length * 1.5) / 2
         bat_pos_y = WINDOW_HEIGHT - bat_size
         ball = Ball(ball_pos_x, ball_pos_y, ball_size, screen)
