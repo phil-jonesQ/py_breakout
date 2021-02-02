@@ -208,8 +208,6 @@ def check_lose_life():
             reset(True)
 
 
-
-
 def generate_wall():
     global brick, brick_size, brick_length, bricks, wall_rows, level_target_bricks, score
     cols = WINDOW_WIDTH // brick_length
@@ -342,7 +340,7 @@ def reset(soft):
     #bat_length = WINDOW_WIDTH
     bat_length = 125
     bat_size = WINDOW_HEIGHT / 30
-    ball_size = 8
+    ball_size = 20
     brick_size = 20
     brick_length = 60
     bat_speed = 60
@@ -378,7 +376,7 @@ def reset(soft):
         #bat_length = WINDOW_WIDTH
         bat_length = 125
         bat_size = WINDOW_HEIGHT / 30
-        ball_size = 8
+        ball_size = 20
         brick_size = 20
         brick_length = 60
         bat_speed = 60
