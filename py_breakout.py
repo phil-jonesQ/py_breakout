@@ -73,7 +73,7 @@ def game_stats_display(state_string):
 
 
 def gen_mixer():
-    mix = random.uniform(0.1, 4)
+    mix = random.uniform(0.1, 3)
     return mix
 
 
@@ -172,12 +172,15 @@ def move_ball():
 
     if ball.x < 0:
         deflect_ball("right")
+        return
 
     if ball.y < HUD_AREA:
         deflect_ball("down")
+        return
 
     if ball.x > WINDOW_WIDTH - ball_size:
         deflect_ball("left")
+        return
 
     # Handle direction change when the ball has hit a brick
     if hit_brick:
@@ -188,10 +191,16 @@ def move_ball():
             deflect_ball("up")
             return
         if left:
-            deflect_ball("right")
+            if not top_edge:
+                deflect_ball("down")
+            else:
+                deflect_ball("right")
             return
         if right:
-            deflect_ball("left")
+            if not top_edge:
+                deflect_ball("down")
+            else:
+                deflect_ball("left")
             return
 
 
@@ -273,7 +282,7 @@ def main():
     reset(False)
     pygame.key.set_repeat(1, 50)
     while True:
-        clock.tick(45)
+        clock.tick(70)
         screen.fill(BLACK)
         ball.draw()
         bat.draw()
@@ -340,7 +349,7 @@ def reset(soft):
     #bat_length = WINDOW_WIDTH
     bat_length = 125
     bat_size = WINDOW_HEIGHT / 30
-    ball_size = 20
+    ball_size = 10
     brick_size = 20
     brick_length = 60
     bat_speed = 60
@@ -376,7 +385,7 @@ def reset(soft):
         #bat_length = WINDOW_WIDTH
         bat_length = 125
         bat_size = WINDOW_HEIGHT / 30
-        ball_size = 20
+        ball_size = 10
         brick_size = 20
         brick_length = 60
         bat_speed = 60
